@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.concurrent.TimeUnit;
 
 public class Node
 {
@@ -11,6 +12,7 @@ public class Node
 	public static int outgoingNodeID;
 	public static int duration;
 	public static String message;
+	public static String[] lastRead = new String[10];
 
 	public static void main(String args[])
 	{
@@ -35,10 +37,23 @@ public class Node
 				System.exit(1);
 		    }
 		}
+		
+		// Infinite loop
+		long startTime = System.currentTimeMillis(); //fetch starting time
+		long lastHello = startTime;
+		while(System.currentTimeMillis()-startTime < duration)
+		{
+			// Hello message every 5 seconds
+		    if(System.currentTimeMillis()-lastHello > 5000)
+		    {
+		    	writeFile("Hello "+nodeID+" "+System.currentTimeMillis());
+		    	lastHello = System.currentTimeMillis();
+		    }
+		}
 	}
 	
     // Reading File
-    void readFile()
+    public static void readFile()
     {
     	try
     	{
@@ -56,12 +71,13 @@ public class Node
     }
     
     // Writing File
-    void writeFile()
+    public static void writeFile(String message)
     {
     	try
     	{                              
     		String str = message;
     		String filePath = "output_"+nodeID+".txt";
+    		// Append mode
     		BufferedWriter WriteFile = new BufferedWriter(new FileWriter(filePath,true));
     		WriteFile.write(str);
     		WriteFile.write("\n");

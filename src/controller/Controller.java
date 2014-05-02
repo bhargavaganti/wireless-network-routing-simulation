@@ -8,6 +8,7 @@ import java.io.FileWriter;
 public class Controller
 {
 	public static int duration;
+	public static String[] lastRead = new String[10];
 
 	public static void main(String args[])
 	{
@@ -29,7 +30,7 @@ public class Controller
 	}
 	
 	 // Reading File
-    void readFile()
+    void readFile(String nodeID)
     {
     	try
     	{
@@ -47,7 +48,7 @@ public class Controller
     }
     
     // Writing File
-    void writeFile()
+    void writeFile(String message, String nodeID)
     {
     	try
     	{                              
