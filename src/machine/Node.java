@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 public class Node
@@ -12,7 +14,8 @@ public class Node
 	public static int outgoingNodeID;
 	public static int duration;
 	public static String message;
-	public static String[] lastRead = new String[10];
+	public static String lastRead;
+	public static ArrayList<String> neighbours = new ArrayList<String>();
 
 	public static void main(String args[])
 	{
@@ -46,9 +49,12 @@ public class Node
 			// Hello message every 5 seconds
 		    if(System.currentTimeMillis()-lastHello > 5000)
 		    {
-		    	writeFile("Hello "+nodeID+" "+System.currentTimeMillis());
+		    	writeFile("hello "+nodeID+" "+System.currentTimeMillis());
 		    	lastHello = System.currentTimeMillis();
 		    }
+		    // Reading input file for new messages
+		    readFile();
+		    System.out.println(neighbours);
 		}
 	}
 	
@@ -57,11 +63,29 @@ public class Node
     {
     	try
     	{
+    		Boolean readAllow = false;
     		String str = "input_"+nodeID+".txt";
     		BufferedReader ReadFile = new BufferedReader(new FileReader(str));
     		while((str = ReadFile.readLine()) != null)
     		{
-    			System.out.println("File Data:"+str);
+    			String[] tokens = str.split(" ");
+    			// First message
+    			if(lastRead == null || readAllow)
+    			{
+    				lastRead = str;
+    				if(tokens[0].equals("hello"))
+    				{
+    					// Find Neighbours
+    					if(!neighbours.contains(tokens[1]))
+    					{
+    						neighbours.add(tokens[1]);
+    					}
+    				}
+    			}
+    			else if(lastRead.equals(str))
+    			{
+    				readAllow = true;
+    			}
     		}
         }
         catch(Exception e)

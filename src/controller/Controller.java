@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.*;
 
 public class Controller
 {
 	public static int duration;
 	public static String[] lastRead = new String[10];
+	public static HashMap<String, ArrayList<String>> adjacency = new HashMap<String, ArrayList<String>>();
 
 	public static void main(String args[])
 	{
@@ -27,18 +29,57 @@ public class Controller
 				System.exit(1);
 		    }
 		}
+		InputOutputHandler IOH = new InputOutputHandler();
+		IOH.readControllerConfig();
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// Infinite loop
+		long startTime = System.currentTimeMillis(); //fetch starting time
+		while(System.currentTimeMillis()-startTime < duration)
+		{
+			// Read from all output files sequentially
+			for(int i=0;i<3;i++)
+			{
+				readFile(i);
+			}
+		}
 	}
 	
 	 // Reading File
-    void readFile(String nodeID)
+    static void readFile(int nodeID)
     {
     	try
     	{
-    		String str = "input_"+nodeID+".txt";
+    		Boolean readAllow = false;
+    		String str = "output_"+nodeID+".txt";
     		BufferedReader ReadFile = new BufferedReader(new FileReader(str));
     		while((str = ReadFile.readLine()) != null)
     		{
-    			System.out.println("File Data:"+str);
+    			String[] tokens = str.split(" ");
+    			// First message
+    			if(lastRead[nodeID] == null || readAllow)
+    			{
+    				lastRead[nodeID] = str;
+    				if(tokens[0].equals("hello"))
+    				{
+    					// Find Neighbours
+    					ArrayList<String> neighbours = new ArrayList<String>();
+    					neighbours = adjacency.get(tokens[1]);
+    					Iterator<String> it = neighbours.iterator();
+    					while(it.hasNext()){
+    						writeFile(str, it.next());
+    					}
+    				}
+    			}
+    			else if(lastRead[nodeID].equals(str))
+    			{
+    				readAllow = true;
+    			}
     		}
         }
         catch(Exception e)
@@ -47,13 +88,13 @@ public class Controller
         }
     }
     
-    // Writing File
-    void writeFile(String message, String nodeID)
+     // Writing File
+    static void writeFile(String message, String nodeID)
     {
     	try
     	{                              
     		String str = message;
-    		String filePath = "output_"+nodeID+".txt";
+    		String filePath = "input_"+nodeID+".txt";
     		BufferedWriter WriteFile = new BufferedWriter(new FileWriter(filePath,true));
     		WriteFile.write(str);
     		WriteFile.write("\n");
