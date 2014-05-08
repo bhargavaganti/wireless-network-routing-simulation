@@ -9,7 +9,7 @@ import java.util.*;
 public class Controller
 {
 	public static int duration;
-	public static String[] lastRead = new String[10];
+	//public static String[] lastRead = new String[10];
 	public static int[] lastCount = new int[10];
 	public static HashMap<String, ArrayList<String>> adjacency = new HashMap<String, ArrayList<String>>();
 
@@ -71,6 +71,16 @@ public class Controller
     			{
     				System.out.println("Satisfied: temp:"+temp+" lastcount:"+lastCount[nodeID]);
     				if(tokens[0].equals("hello"))
+    				{
+    					// Find Neighbours
+    					ArrayList<String> neighbours = new ArrayList<String>();
+    					neighbours = adjacency.get(tokens[1]);
+    					Iterator<String> it = neighbours.iterator();
+    					while(it.hasNext()){
+    						writeFile(str, it.next());
+    					}
+    				}
+    				if(tokens[0].equals("intree"))
     				{
     					// Find Neighbours
     					ArrayList<String> neighbours = new ArrayList<String>();

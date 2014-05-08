@@ -14,9 +14,10 @@ public class Node
 	public static int outgoingNodeID;
 	public static int duration;
 	public static String message;
-	public static String lastRead;
+	//public static String lastRead;
 	public static int lastCount;
 	public static ArrayList<String> neighbours = new ArrayList<String>();
+	public static String[] intree = new String[10];
 
 	public static void main(String args[])
 	{
@@ -45,6 +46,7 @@ public class Node
 		// Infinite loop
 		long startTime = System.currentTimeMillis(); //fetch starting time
 		long lastHello = startTime;
+		long lastIntree = startTime;
 		while(System.currentTimeMillis()-startTime < duration)
 		{
 			// Hello message every 5 seconds
@@ -53,10 +55,33 @@ public class Node
 		    	writeFile("hello "+nodeID+" "+System.currentTimeMillis());
 		    	lastHello = System.currentTimeMillis();
 		    }
+		    if(System.currentTimeMillis()-lastIntree > 10000)
+		    {
+		    	writeFile(intree[nodeID]);
+		    	lastIntree = System.currentTimeMillis();
+		    }
 		    // Reading input file for new messages
 		    readFile();
-		    System.out.println(neighbours);
+		    System.out.println("neighbours:"+neighbours);
+		    //createIntree();
 		}
+	}
+	
+	// Merging Intree
+	public static void mergeIntree()
+	{
+		
+	}
+
+	// Making Intree from Neighbours List
+	public static void createIntree()
+	{
+		intree[nodeID] = "intree "+nodeID;
+		for(String neighbour : neighbours)
+		{
+			intree[nodeID] += " ("+neighbour+" "+nodeID+")";
+		}
+		//System.out.println("Intree at "+nodeID+" :"+intree[nodeID]);
 	}
 	
     // Reading File
@@ -76,13 +101,21 @@ public class Node
     			++temp;
     			if(temp > lastCount)
     			{
+    				// Reading Hello Protocol messages
     				if(tokens[0].equals("hello"))
     				{
     					// Find Neighbours
     					if(!neighbours.contains(tokens[1]))
     					{
+    						// New neighbours discovered
     						neighbours.add(tokens[1]);
+    						createIntree();
     					}
+    				}
+    				// Reading intree protocol messages
+    				if(tokens[0].equals("intree"))
+    				{
+    					
     				}
     			}
     			
