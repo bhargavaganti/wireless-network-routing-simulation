@@ -10,6 +10,7 @@ public class Controller
 {
 	public static int duration;
 	public static String[] lastRead = new String[10];
+	public static int[] lastCount = new int[10];
 	public static HashMap<String, ArrayList<String>> adjacency = new HashMap<String, ArrayList<String>>();
 
 	public static void main(String args[])
@@ -58,11 +59,30 @@ public class Controller
     		Boolean readAllow = false;
     		String str = "output_"+nodeID+".txt";
     		BufferedReader ReadFile = new BufferedReader(new FileReader(str));
+    		int temp = 0;
+    		System.out.println("Reading node:"+nodeID+" Last Read line:"+lastCount[nodeID]);
     		while((str = ReadFile.readLine()) != null)
     		{
     			String[] tokens = str.split(" ");
     			// First message
-    			if(lastRead[nodeID] == null || readAllow)
+    			
+    			++temp;
+    			if(temp > lastCount[nodeID])
+    			{
+    				System.out.println("Satisfied: temp:"+temp+" lastcount:"+lastCount[nodeID]);
+    				if(tokens[0].equals("hello"))
+    				{
+    					// Find Neighbours
+    					ArrayList<String> neighbours = new ArrayList<String>();
+    					neighbours = adjacency.get(tokens[1]);
+    					Iterator<String> it = neighbours.iterator();
+    					while(it.hasNext()){
+    						writeFile(str, it.next());
+    					}
+    				}
+    			}
+    			
+/*    			if(lastRead[nodeID] == null || readAllow)
     			{
     				lastRead[nodeID] = str;
     				if(tokens[0].equals("hello"))
@@ -79,8 +99,9 @@ public class Controller
     			else if(lastRead[nodeID].equals(str))
     			{
     				readAllow = true;
-    			}
+    			}*/
     		}
+    		lastCount[nodeID] = temp;
         }
         catch(Exception e)
         {

@@ -15,6 +15,7 @@ public class Node
 	public static int duration;
 	public static String message;
 	public static String lastRead;
+	public static int lastCount;
 	public static ArrayList<String> neighbours = new ArrayList<String>();
 
 	public static void main(String args[])
@@ -66,11 +67,26 @@ public class Node
     		Boolean readAllow = false;
     		String str = "input_"+nodeID+".txt";
     		BufferedReader ReadFile = new BufferedReader(new FileReader(str));
+    		int temp = 0;
     		while((str = ReadFile.readLine()) != null)
     		{
     			String[] tokens = str.split(" ");
     			// First message
-    			if(lastRead == null || readAllow)
+    			
+    			++temp;
+    			if(temp > lastCount)
+    			{
+    				if(tokens[0].equals("hello"))
+    				{
+    					// Find Neighbours
+    					if(!neighbours.contains(tokens[1]))
+    					{
+    						neighbours.add(tokens[1]);
+    					}
+    				}
+    			}
+    			
+    			/*if(lastRead == null || readAllow)
     			{
     				lastRead = str;
     				if(tokens[0].equals("hello"))
@@ -85,8 +101,9 @@ public class Node
     			else if(lastRead.equals(str))
     			{
     				readAllow = true;
-    			}
+    			}*/
     		}
+    		lastCount = temp;
         }
         catch(Exception e)
         {
