@@ -33,21 +33,24 @@ public class Controller
 		InputOutputHandler IOH = new InputOutputHandler();
 		IOH.readControllerConfig();
 		
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// Infinite loop
-		long startTime = System.currentTimeMillis(); //fetch starting time
-		while(System.currentTimeMillis()-startTime < duration)
+		try
 		{
-			// Read from all output files sequentially
-			for(int i=0;i<3;i++)
+			Thread.sleep(5000);
+			// Infinite loop
+			long startTime = System.currentTimeMillis(); //fetch starting time
+			while(System.currentTimeMillis()-startTime < duration)
 			{
-				readFile(i);
+				// Read from all output files sequentially
+				for(int i=0;i<5;i++)
+				{
+					readFile(i);
+				}
 			}
+		}
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
 		}
 	}
 	
@@ -60,7 +63,7 @@ public class Controller
     		String str = "output_"+nodeID+".txt";
     		BufferedReader ReadFile = new BufferedReader(new FileReader(str));
     		int temp = 0;
-    		System.out.println("Reading node:"+nodeID+" Last Read line:"+lastCount[nodeID]);
+    		//System.out.println("Reading node:"+nodeID+" Last Read line:"+lastCount[nodeID]);
     		while((str = ReadFile.readLine()) != null)
     		{
     			String[] tokens = str.split(" ");
@@ -69,7 +72,7 @@ public class Controller
     			++temp;
     			if(temp > lastCount[nodeID])
     			{
-    				System.out.println("Satisfied: temp:"+temp+" lastcount:"+lastCount[nodeID]);
+    				//System.out.println("Satisfied: temp:"+temp+" lastcount:"+lastCount[nodeID]);
     				if(tokens[0].equals("hello"))
     				{
     					// Find Neighbours
@@ -115,7 +118,7 @@ public class Controller
         }
         catch(Exception e)
         {
-            System.out.println(e + " in readFile()");
+            // System.out.println(e + " in readFile()");
         }
     }
     
@@ -133,7 +136,7 @@ public class Controller
         }
         catch(Exception e)
         {
-            System.out.println(e + " in writeFile()");
+            // System.out.println(e + " in writeFile()");
         }
     }
 }

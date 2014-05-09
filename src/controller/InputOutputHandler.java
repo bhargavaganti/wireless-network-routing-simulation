@@ -22,9 +22,9 @@ public class InputOutputHandler
 			while ((sCurrentLine = br.readLine()) != null)
 			{
 				ArrayList<String> array = new ArrayList<String>();
-				System.out.println("Reading Line");
+				//System.out.println("Reading Line");
 				String[] tokens = sCurrentLine.split(" ");
-				System.out.println("First:"+tokens[0]+" Second:"+tokens[1]);
+				//System.out.println("First:"+tokens[0]+" Second:"+tokens[1]);
 				if(Controller.adjacency.get(tokens[0]) == null)
 				{
 					array.clear();
