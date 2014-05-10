@@ -20,6 +20,9 @@ public class Node
 	public static int lastCount;
 	public static ArrayList<String> neighbours = new ArrayList<String>();
 	public static String[] intree = new String[10];
+	public static long[] lastHelloArray = new long[10];
+	public static int lastDeletedNode = -1;
+	public static boolean deleted = false;
 	
 	static List<Integer> usedNodes = new ArrayList<>();
 	static List<Integer> nextCheck = new ArrayList<>();
@@ -66,7 +69,8 @@ public class Node
 			// Hello message every 5 seconds
 		    if(System.currentTimeMillis()-lastHello > 5000)
 		    {
-		    	writeFile("hello "+nodeID+" "+System.currentTimeMillis());
+		    	//writeFile("hello "+nodeID+" "+System.currentTimeMillis());
+		    	writeFile("hello "+nodeID);
 		    	lastHello = System.currentTimeMillis();
 		    }
 		    if(System.currentTimeMillis()-lastIntree > 10000)
@@ -79,10 +83,35 @@ public class Node
 		    	sendData(nodeID, outgoingNodeID, message);
 		    	lastData = System.currentTimeMillis();
 		    }
+		    // No Recent Hello Message Check
+		    for(String neighbour : neighbours)
+		    {
+		    	if(System.currentTimeMillis() - lastHelloArray[Integer.valueOf(neighbour)] > 30000)
+		    	{
+		    		
+		    		// System.out.println("NODE DEAD:"+neighbour);
+		    		deleted = true;
+		    		lastDeletedNode = Integer.valueOf(neighbour);
+
+		    	}
+		    }
+		    if(deleted)
+		    {
+		    	neighbours.remove(String.valueOf(lastDeletedNode));
+		    	deleted = false;
+	    		createIntree();
+	    		writeFile("delete "+lastDeletedNode);
+		    }
 		    // Reading input file for new messages
 		    readFile();
 		    //System.out.println("neighbours:"+neighbours);
-		    // TODO: SEND MESSAGE
+
+		    try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		System.out.println("node "+nodeID+" stopped");
 	}
@@ -134,7 +163,7 @@ public class Node
 		Boolean pathFound=false;
 		while(!nextHop.isEmpty())
 		{
-			for(int i=0;i<6;i++)
+			for(int i=0;i<10;i++)
 			{
 				if(readIntreeMatrix[nextHop.get(0)][i] == 1)
 				{
@@ -170,7 +199,7 @@ public class Node
 		Boolean pathFound=false;
 		while(!nextHop.isEmpty())
 		{
-			for(int i=0;i<6;i++)
+			for(int i=0;i<10;i++)
 			{
 				if(myIntreeMatrix[nextHop.get(0)][i] == 1)
 				{
@@ -198,7 +227,7 @@ public class Node
 	{
 		int[][] myIntreeMatrix = returnMatrix(intree[nodeID]);
 		int[][] readIntreeMatrix = returnMatrix(readIntree);
-		int[][] newMatrix = new int[6][6];
+		int[][] newMatrix = new int[10][10];
 		
 		//System.out.println("Old Intree:"+intree[nodeID]);
 		//System.out.println("Received Intree:"+readIntree);
@@ -261,7 +290,7 @@ public class Node
 	
 	public static int[][] returnMatrix(String tree)
 	{
-		int[][] matrix = new int[6][6];
+		int[][] matrix = new int[10][10];
 		String[] tokens = tree.split(" ");
 		for(int i=0;i<tokens.length;i++)
 		{
@@ -307,6 +336,9 @@ public class Node
     				// hello 2 1399591802089
     				if(tokens[0].equals("hello"))
     				{
+    					// Putting Hello TS to array
+    					lastHelloArray[Integer.valueOf(tokens[1])] = System.currentTimeMillis();
+    					
     					// Find Neighbours
     					if(!neighbours.contains(tokens[1]))
     					{
@@ -318,7 +350,7 @@ public class Node
     				
     				// Reading intree protocol messages
     				// intree 2 ( 0 2 ) ( 1 2 )
-    				if(tokens[0].equals("intree"))
+    				if(tokens[0].equals("intree") && !str.contains(String.valueOf(lastDeletedNode)))
     				{
     					// storing intree for source routing
     					intree[Integer.valueOf(tokens[1])] = str;
@@ -383,6 +415,13 @@ public class Node
     						// IGNORE MESSAGE
     					}
     				}
+    				if(tokens[0].equals("delete") && lastDeletedNode != Integer.valueOf(tokens[1]))
+    				{
+    		    		// System.out.println("NODE DEAD:"+neighbour);
+    		    		lastDeletedNode = Integer.valueOf(tokens[1]);
+    		    		createIntree();
+    		    		writeFile(str);
+    				}
     			}
     			
     		}
@@ -435,8 +474,8 @@ public class Node
 	public static void printMatrix(int[][] matrix)
 	{
 		System.out.println("Length:"+matrix.length);
-		for (int i = 0; i < 6; i++) {
-		    for (int j = 0; j < 6; j++) {
+		for (int i = 0; i < 10; i++) {
+		    for (int j = 0; j < 10; j++) {
 		        System.out.print(matrix[i][j] + " ");
 		    }
 		    System.out.print("\n");

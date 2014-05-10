@@ -31,7 +31,6 @@ public class Controller
 				System.exit(1);
 		    }
 		}
-		//InputOutputHandler IOH = new InputOutputHandler();
 		readControllerConfig();
 		
 		try
@@ -42,11 +41,17 @@ public class Controller
 			while(System.currentTimeMillis()-startTime < duration)
 			{
 				// Read from all output files sequentially
-				for(int i=0;i<6;i++)
+				for(int i=0;i<10;i++)
 				{
 					readFile(i);
 				}
 				//System.out.println(System.currentTimeMillis()-startTime);
+			    try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			//System.exit(0);
 		}
@@ -78,27 +83,7 @@ public class Controller
     			if(temp > lastCount[nodeID])
     			{
     				//System.out.println("Satisfied: temp:"+temp+" lastcount:"+lastCount[nodeID]);
-    				if(tokens[0].equals("hello"))
-    				{
-    					// Find Neighbours
-    					ArrayList<String> neighbours = new ArrayList<String>();
-    					neighbours = adjacency.get(tokens[1]);
-    					Iterator<String> it = neighbours.iterator();
-    					while(it.hasNext()){
-    						writeFile(str, it.next());
-    					}
-    				}
-    				if(tokens[0].equals("intree"))
-    				{
-    					// Find Neighbours
-    					ArrayList<String> neighbours = new ArrayList<String>();
-    					neighbours = adjacency.get(tokens[1]);
-    					Iterator<String> it = neighbours.iterator();
-    					while(it.hasNext()){
-    						writeFile(str, it.next());
-    					}
-    				}
-    				if(tokens[0].equals("data"))
+    				if(tokens[0].equals("data") || tokens[0].equals("delete") || tokens[0].equals("hello") || tokens[0].equals("intree"))
     				{
     					// Find Neighbours
     					// data A E C B begin message
@@ -158,7 +143,7 @@ public class Controller
     
     public static void readControllerConfig()
 	{
-		try (BufferedReader br = new BufferedReader(new FileReader("topology")))
+		try (BufferedReader br = new BufferedReader(new FileReader("topology.txt")))
 		{
 			String sCurrentLine;
 			
@@ -178,7 +163,6 @@ public class Controller
 				}
 				else
 				{
-					
 					//System.out.println("Appending element");
 					array = adjacency.get(tokens[0]);
 					array.add(tokens[1]);
@@ -191,8 +175,7 @@ public class Controller
 			for (int i=0;i<10;i++)
 			{
 				System.out.println(Controller.adjacency.get(String.valueOf(i)));
-			}
-			*/
+			}*/
 	
 		} catch (IOException e) 
 		{
