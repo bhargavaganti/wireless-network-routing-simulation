@@ -86,8 +86,9 @@ public class Node
 		int incomingNeighbour = -1;
 		try
 		{
-			if (!neighbours.contains(destination))
+			if (!neighbours.contains(String.valueOf(destination)))
 			{
+				System.out.println("neighbors:"+neighbours+" destination"+destination);
 				System.out.println("destination not neighbour");
 				incomingNeighbour = calculateIncomingNeighbour(destination);
 			}
@@ -98,6 +99,11 @@ public class Node
 			}
 			
 			String path = pathToIncomingNeighbour(incomingNeighbour);
+			if (path == null || incomingNeighbour == -1)
+			{
+				Exception myException = new Exception();
+				throw myException;
+			}
 			System.out.println("PATH:"+path);
 			// data A E C B begin message
 			String finalMessage = "data "+source+" "+destination+" "+path+"begin "+message;
@@ -114,9 +120,11 @@ public class Node
 	public static String pathToIncomingNeighbour(int incomingNeighbour)
 	{
 		int[][] readIntreeMatrix = returnMatrix(intree[incomingNeighbour]);
+		System.out.println("Neighbor intree:"+intree[incomingNeighbour]);
 		String path = "";
 		List<Integer> nextHop = new ArrayList<>();
 		nextHop.add(nodeID);
+		Boolean pathFound=false;
 		while(!nextHop.isEmpty())
 		{
 			for(int i=0;i<6;i++)
@@ -134,7 +142,12 @@ public class Node
 					path += i+" ";
 					nextHop.clear();
 					nextHop.add(i);
+					pathFound = true;
 				}
+			}
+			if(pathFound == false)
+			{
+				return null;
 			}
 		}
 		//System.out.println("PATH:"+ path);
@@ -147,6 +160,7 @@ public class Node
 		int[][] myIntreeMatrix = returnMatrix(intree[nodeID]);
 		List<Integer> nextHop = new ArrayList<>();
 		nextHop.add(destNode);
+		Boolean pathFound=false;
 		while(!nextHop.isEmpty())
 		{
 			for(int i=0;i<6;i++)
@@ -160,7 +174,12 @@ public class Node
 					}
 					nextHop.clear();
 					nextHop.add(i);
+					pathFound = true;
 				}
+			}
+			if(pathFound == false)
+			{
+				return -1;
 			}
 		}
 
@@ -301,20 +320,44 @@ public class Node
     				// data A E C B begin message
     				// 0    1 2 3 4 5
     				// data 0 3 3 begin message from 0 to 3
+    				// data 2 4 1 begin message from 2 to 4
+    				// data 2 4 2 3 0 begin message from 2 to 4 FWD
+    				// data 2 4 0 begin message from 2 to 4 new route
+    				// data 2 4 4 3 begin message from 2 to 4
     				if(tokens[0].equals("data"))
     				{
     					// storing intree for source routing
     					// Destination check
-    					if(Integer.valueOf(tokens[2]) == nodeID)
+    					if(Integer.valueOf(tokens[2]) == nodeID && Integer.valueOf(tokens[3]) == nodeID && tokens[4].equals("begin"))
     					{
-    						System.out.println("Hurray MESSAGE RECEIVED");
+    						String message="";
+							for(int i=5;i<tokens.length;i++)
+							{
+								// message will have extra space at end
+								// TODO: Fix
+								message += tokens[i]+" ";
+							}
+    						System.out.println("Hurray MESSAGE RECEIVED"+message);
     					}
     					// Intermediate check
     					else if(Integer.valueOf(tokens[3]) == nodeID)
     					{
     						if(tokens[4].equals("begin"))
     						{
-    							// New Source Routing
+    							//New Source Routing
+    							String message="";
+    							for(int i=5;i<tokens.length;i++)
+    							{
+    								// message will have extra space at end
+    								// TODO: Fix
+    								message += tokens[i]+" ";
+    							}
+    							System.out.println("New Souce Routing message:"+message);
+    							//StringUtils.stripEnd(message," ");
+    							int source = Integer.valueOf(tokens[1]);
+    							int destination = Integer.valueOf(tokens[2]);
+    							sendData(source, destination, message);
+    							
     						}
     						else
     						{
