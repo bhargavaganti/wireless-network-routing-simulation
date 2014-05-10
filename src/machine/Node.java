@@ -29,6 +29,7 @@ public class Node
 	{
 		// User will let the node know its nodeID
 		// node 9 100 5 "this is a message" &
+		// 0 100 3 "message from 0 to 3" &
 		if (args.length > 0)
 		{
 			try
@@ -53,6 +54,7 @@ public class Node
 		long startTime = System.currentTimeMillis(); //fetch starting time
 		long lastHello = startTime;
 		long lastIntree = startTime;
+		long lastData = startTime;
 		while(System.currentTimeMillis()-startTime < duration)
 		{
 			// Hello message every 5 seconds
@@ -66,11 +68,103 @@ public class Node
 		    	writeFile(intree[nodeID]);
 		    	lastIntree = System.currentTimeMillis();
 		    }
+		    if(outgoingNodeID != -1 && (System.currentTimeMillis()-lastData > 15000))
+		    {
+		    	sendData(nodeID, outgoingNodeID, message);
+		    	lastData = System.currentTimeMillis();
+		    }
 		    // Reading input file for new messages
 		    readFile();
 		    //System.out.println("neighbours:"+neighbours);
-		    // TODO:
+		    // TODO: SEND MESSAGE
 		}
+	}
+	
+	public static void sendData(int source, int destination, String message)
+	{
+		// 0 100 3 "message from 0 to 3" &
+		int incomingNeighbour = -1;
+		try
+		{
+			if (!neighbours.contains(destination))
+			{
+				System.out.println("destination not neighbour");
+				incomingNeighbour = calculateIncomingNeighbour(destination);
+			}
+			else
+			{
+				System.out.println("destination neighbour");
+				incomingNeighbour = destination;
+			}
+			
+			String path = pathToIncomingNeighbour(incomingNeighbour);
+			System.out.println("PATH:"+path);
+			// data A E C B begin message
+			String finalMessage = "data "+source+" "+destination+" "+path+"begin "+message;
+			System.out.println("finalmessage:"+finalMessage);
+			writeFile(finalMessage);
+		}
+		catch(Exception e)
+		{
+			// Message cannt be sent. No Path.
+			System.out.println("NO PATH");
+		}
+	}
+	
+	public static String pathToIncomingNeighbour(int incomingNeighbour)
+	{
+		int[][] readIntreeMatrix = returnMatrix(intree[incomingNeighbour]);
+		String path = "";
+		List<Integer> nextHop = new ArrayList<>();
+		nextHop.add(nodeID);
+		while(!nextHop.isEmpty())
+		{
+			for(int i=0;i<6;i++)
+			{
+				if(readIntreeMatrix[nextHop.get(0)][i] == 1)
+				{
+					if (i == incomingNeighbour)
+					{
+						path += i+" ";
+						//System.out.println("edge:"+nextHop.get(0)+"-"+i);
+						//System.out.println("PATH:"+ path);
+						return path;
+					}
+					//System.out.println("edge:"+nextHop.get(0)+"-"+i);
+					path += i+" ";
+					nextHop.clear();
+					nextHop.add(i);
+				}
+			}
+		}
+		//System.out.println("PATH:"+ path);
+		return null;
+	}
+	
+	public static int calculateIncomingNeighbour(int destination)
+	{
+		int destNode = destination;
+		int[][] myIntreeMatrix = returnMatrix(intree[nodeID]);
+		List<Integer> nextHop = new ArrayList<>();
+		nextHop.add(destNode);
+		while(!nextHop.isEmpty())
+		{
+			for(int i=0;i<6;i++)
+			{
+				if(myIntreeMatrix[nextHop.get(0)][i] == 1)
+				{
+					if (i == nodeID)
+					{
+						System.out.println("DEST:"+nextHop.get(0));
+						return nextHop.get(0);
+					}
+					nextHop.clear();
+					nextHop.add(i);
+				}
+			}
+		}
+
+		return -1;
 	}
 	
 	// Merging Intree
@@ -200,27 +294,46 @@ public class Node
     				// intree 2 ( 0 2 ) ( 1 2 )
     				if(tokens[0].equals("intree"))
     				{
+    					// storing intree for source routing
     					intree[Integer.valueOf(tokens[1])] = str;
     					mergeIntree(str);
     				}
-    			}
-    			
-    			/*if(lastRead == null || readAllow)
-    			{
-    				lastRead = str;
-    				if(tokens[0].equals("hello"))
+    				// data A E C B begin message
+    				// 0    1 2 3 4 5
+    				// data 0 3 3 begin message from 0 to 3
+    				if(tokens[0].equals("data"))
     				{
-    					// Find Neighbours
-    					if(!neighbours.contains(tokens[1]))
+    					// storing intree for source routing
+    					// Destination check
+    					if(Integer.valueOf(tokens[2]) == nodeID)
     					{
-    						neighbours.add(tokens[1]);
+    						System.out.println("Hurray MESSAGE RECEIVED");
+    					}
+    					// Intermediate check
+    					else if(Integer.valueOf(tokens[3]) == nodeID)
+    					{
+    						if(tokens[4].equals("begin"))
+    						{
+    							// New Source Routing
+    						}
+    						else
+    						{
+    							// Forward data to tokens[4]
+    							String newMessage="data "+tokens[1]+" "+tokens[2];
+    							for(int i=4;i<tokens.length;i++)
+    							{
+    								newMessage += " "+tokens[i];
+    							}
+    							writeFile(newMessage);
+    						}
+    					}
+    					else
+    					{
+    						// IGNORE MESSAGE
     					}
     				}
     			}
-    			else if(lastRead.equals(str))
-    			{
-    				readAllow = true;
-    			}*/
+    			
     		}
     		lastCount = temp;
         }

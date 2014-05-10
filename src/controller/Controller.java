@@ -93,6 +93,17 @@ public class Controller
     						writeFile(str, it.next());
     					}
     				}
+    				if(tokens[0].equals("data"))
+    				{
+    					// Find Neighbours
+    					// data A E C B begin message
+    					ArrayList<String> neighbours = new ArrayList<String>();
+    					neighbours = adjacency.get(String.valueOf(nodeID));
+    					Iterator<String> it = neighbours.iterator();
+    					while(it.hasNext()){
+    						writeFile(str, it.next());
+    					}
+    				}
     			}
     			
 /*    			if(lastRead[nodeID] == null || readAllow)
