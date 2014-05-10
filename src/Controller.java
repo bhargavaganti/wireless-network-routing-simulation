@@ -1,9 +1,10 @@
-package controller;
+
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Controller
@@ -22,7 +23,7 @@ public class Controller
 			try
 			{
 				duration = 1000*Integer.parseInt(args[0]);
-				System.out.println("duration:"+duration);
+				//System.out.println("duration:"+duration);
 		    }
 			catch (Exception e)
 			{
@@ -30,28 +31,32 @@ public class Controller
 				System.exit(1);
 		    }
 		}
-		InputOutputHandler IOH = new InputOutputHandler();
-		IOH.readControllerConfig();
+		//InputOutputHandler IOH = new InputOutputHandler();
+		readControllerConfig();
 		
 		try
 		{
-			Thread.sleep(5000);
+			//Thread.sleep(5000);
 			// Infinite loop
 			long startTime = System.currentTimeMillis(); //fetch starting time
 			while(System.currentTimeMillis()-startTime < duration)
 			{
 				// Read from all output files sequentially
-				for(int i=0;i<5;i++)
+				for(int i=0;i<6;i++)
 				{
 					readFile(i);
 				}
+				//System.out.println(System.currentTimeMillis()-startTime);
 			}
+			//System.exit(0);
 		}
 		catch (Exception e)
 		{
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 		}
+		//System.exit(0);
+		System.out.println("controller stopped");
 	}
 	
 	 // Reading File
@@ -150,4 +155,48 @@ public class Controller
             // System.out.println(e + " in writeFile()");
         }
     }
+    
+    public static void readControllerConfig()
+	{
+		try (BufferedReader br = new BufferedReader(new FileReader("topology")))
+		{
+			String sCurrentLine;
+			
+			while ((sCurrentLine = br.readLine()) != null)
+			{
+				ArrayList<String> array = new ArrayList<String>();
+				//System.out.println("Reading Line");
+				String[] tokens = sCurrentLine.split(" ");
+				//System.out.println("First:"+tokens[0]+" Second:"+tokens[1]);
+				if(adjacency.get(tokens[0]) == null)
+				{
+					array.clear();
+					//System.out.println("Adding new element");
+					array.add(tokens[1]);
+					adjacency.put(tokens[0], array);
+					//System.out.println("New at:"+tokens[0]+":Element:"+Controller.adjacency.get(tokens[0]));
+				}
+				else
+				{
+					
+					//System.out.println("Appending element");
+					array = adjacency.get(tokens[0]);
+					array.add(tokens[1]);
+					adjacency.put(tokens[0], array);
+					//System.out.println("Appended at:"+tokens[0]+":Element:"+Controller.adjacency.get(tokens[0]));
+				}
+			}
+			
+			/*// Testing the HashMap output
+			for (int i=0;i<10;i++)
+			{
+				System.out.println(Controller.adjacency.get(String.valueOf(i)));
+			}
+			*/
+	
+		} catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+	}
 }

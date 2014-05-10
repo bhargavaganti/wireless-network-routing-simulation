@@ -1,10 +1,11 @@
-package machine;
+
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -34,19 +35,24 @@ public class Node
 		{
 			try
 			{
+				//System.out.println(Arrays.toString(args));
 				nodeID = Integer.parseInt(args[0]);
 				duration = 1000*Integer.parseInt(args[1]);
 				outgoingNodeID = Integer.parseInt(args[2]);
-				message = args[3];
-				System.out.println("nodeID:"+nodeID);
+				if(outgoingNodeID != -1)
+				{
+					message = args[3];
+				}
+				/*System.out.println("nodeID:"+nodeID);
 				System.out.println("duration:"+duration);
 				System.out.println("outgoingNodeID:"+outgoingNodeID);
-				System.out.println("message:"+message);
+				System.out.println("message:"+message);*/
 		    }
 			catch (Exception e)
 			{
+				System.out.println(e);
 				System.err.println("Argument must be in proper format");
-				System.exit(1);
+				//System.exit(1);
 		    }
 		}
 		
@@ -78,6 +84,7 @@ public class Node
 		    //System.out.println("neighbours:"+neighbours);
 		    // TODO: SEND MESSAGE
 		}
+		System.out.println("node "+nodeID+" stopped");
 	}
 	
 	public static void sendData(int source, int destination, String message)
@@ -88,13 +95,13 @@ public class Node
 		{
 			if (!neighbours.contains(String.valueOf(destination)))
 			{
-				System.out.println("neighbors:"+neighbours+" destination"+destination);
-				System.out.println("destination not neighbour");
+				//System.out.println("neighbors:"+neighbours+" destination"+destination);
+				//System.out.println("destination not neighbour");
 				incomingNeighbour = calculateIncomingNeighbour(destination);
 			}
 			else
 			{
-				System.out.println("destination neighbour");
+				//System.out.println("destination neighbour");
 				incomingNeighbour = destination;
 			}
 			
@@ -104,23 +111,23 @@ public class Node
 				Exception myException = new Exception();
 				throw myException;
 			}
-			System.out.println("PATH:"+path);
+			//System.out.println("PATH:"+path);
 			// data A E C B begin message
 			String finalMessage = "data "+source+" "+destination+" "+path+"begin "+message;
-			System.out.println("finalmessage:"+finalMessage);
+			//System.out.println("finalmessage:"+finalMessage);
 			writeFile(finalMessage);
 		}
 		catch(Exception e)
 		{
 			// Message cannt be sent. No Path.
-			System.out.println("NO PATH");
+			//System.out.println("NO PATH");
 		}
 	}
 	
 	public static String pathToIncomingNeighbour(int incomingNeighbour)
 	{
 		int[][] readIntreeMatrix = returnMatrix(intree[incomingNeighbour]);
-		System.out.println("Neighbor intree:"+intree[incomingNeighbour]);
+		//System.out.println("Neighbor intree:"+intree[incomingNeighbour]);
 		String path = "";
 		List<Integer> nextHop = new ArrayList<>();
 		nextHop.add(nodeID);
@@ -169,7 +176,7 @@ public class Node
 				{
 					if (i == nodeID)
 					{
-						System.out.println("DEST:"+nextHop.get(0));
+						//System.out.println("DEST:"+nextHop.get(0));
 						return nextHop.get(0);
 					}
 					nextHop.clear();
@@ -193,8 +200,8 @@ public class Node
 		int[][] readIntreeMatrix = returnMatrix(readIntree);
 		int[][] newMatrix = new int[6][6];
 		
-		System.out.println("Old Intree:"+intree[nodeID]);
-		System.out.println("Received Intree:"+readIntree);
+		//System.out.println("Old Intree:"+intree[nodeID]);
+		//System.out.println("Received Intree:"+readIntree);
 		
 		// Merge Matrix
 		for(int i=0;i<newMatrix.length;i++)
@@ -208,7 +215,7 @@ public class Node
 				}
 			}
 		}
-		printMatrix(newMatrix);
+		//printMatrix(newMatrix);
 		// Converting matrix to string
 		usedNodes.clear();
 		newIntree = "intree "+nodeID;
@@ -219,7 +226,7 @@ public class Node
 			generateIntree(newMatrix);
 		}
 		
-		System.out.println("INTREE:"+newIntree);
+		//System.out.println("INTREE:"+newIntree);
 		intree[nodeID] = newIntree;
 		//System.exit(0);
 		
@@ -235,7 +242,7 @@ public class Node
 		//System.out.println("tempCheck:"+tempCheck);
 		for(int nextInt: tempCheck)
 		{
-			System.out.println("nextInt:"+nextInt);
+			//System.out.println("nextInt:"+nextInt);
 			for(int i=0;i<newMatrix.length;i++)
 			{
 				//usedNodes.add(nextInt);
@@ -276,7 +283,7 @@ public class Node
 		{
 			intree[nodeID] += " ( "+neighbour+" "+nodeID+" )";
 		}
-		System.out.println("Hello Intree at "+nodeID+" :"+intree[nodeID]);
+		//System.out.println("Hello Intree at "+nodeID+" :"+intree[nodeID]);
 	}
 	
     // Reading File
@@ -337,7 +344,8 @@ public class Node
 								// TODO: Fix
 								message += tokens[i]+" ";
 							}
-    						System.out.println("Hurray MESSAGE RECEIVED"+message);
+    						//System.out.println("MESSAGE RECEIVED:"+message);
+    						writeMessage("message from "+tokens[1]+":"+message);
     					}
     					// Intermediate check
     					else if(Integer.valueOf(tokens[3]) == nodeID)
@@ -352,7 +360,7 @@ public class Node
     								// TODO: Fix
     								message += tokens[i]+" ";
     							}
-    							System.out.println("New Souce Routing message:"+message);
+    							//System.out.println("New Souce Routing message:"+message);
     							//StringUtils.stripEnd(message," ");
     							int source = Integer.valueOf(tokens[1]);
     							int destination = Integer.valueOf(tokens[2]);
@@ -393,6 +401,25 @@ public class Node
     	{                              
     		String str = message;
     		String filePath = "output_"+nodeID+".txt";
+    		// Append mode
+    		BufferedWriter WriteFile = new BufferedWriter(new FileWriter(filePath,true));
+    		WriteFile.write(str);
+    		WriteFile.write("\n");
+    		WriteFile.close();
+        }
+        catch(Exception e)
+        {
+            //System.out.println(e + " in writeFile()");
+        }
+    }
+    
+ // Writing Message
+    public static void writeMessage(String message)
+    {
+    	try
+    	{                              
+    		String str = message;
+    		String filePath = nodeID+"_received"+".txt";
     		// Append mode
     		BufferedWriter WriteFile = new BufferedWriter(new FileWriter(filePath,true));
     		WriteFile.write(str);
